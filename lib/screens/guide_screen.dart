@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../utils/responsive.dart';
 import '../widgets/app_header.dart';
 import '../widgets/menu_bar.dart' as menu;
+import '../services/api_service.dart';
+import '../models/guide_article.dart';
+import '../models/category.dart';
 import 'home_screen.dart';
 import 'calendar_screen.dart';
 import 'account_screen.dart';
@@ -15,16 +18,59 @@ class GuideScreen extends StatefulWidget {
 
 class _GuideScreenState extends State<GuideScreen> {
   String _activeTab = 'guide';
-  String _selectedChip = 'All';
+  String _selectedCategorySlug = 'all';
+  List<GuideArticle> _articles = [];
+  List<Category> _categories = [];
+  bool _isLoading = true;
+  bool _isLoadingCategories = true;
 
-  final List<String> _chips = [
-    'All',
-    'Today',
-    'Menstrual phase',
-    'Follicular phase',
-    'Ovulation phase',
-    'Luteal phase',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+    _loadArticles();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await ApiService.getCategories();
+      setState(() {
+        _categories = categories;
+        _isLoadingCategories = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingCategories = false;
+      });
+    }
+  }
+
+  Future<void> _loadArticles() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final articles = await ApiService.getGuideArticles(
+        categorySlug: _selectedCategorySlug == 'all' ? null : _selectedCategorySlug,
+      );
+      setState(() {
+        _articles = articles;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _onChipSelected(String slug) {
+    setState(() {
+      _selectedCategorySlug = slug;
+    });
+    _loadArticles();
+  }
 
   void _navigateToTab(String tab) {
     if (tab == 'home') {
@@ -59,73 +105,76 @@ class _GuideScreenState extends State<GuideScreen> {
                 horizontal: Responsive.getResponsiveValue(context, mobile: 16, tablet: 24),
                 vertical: Responsive.getResponsiveValue(context, mobile: 32, tablet: 52),
               ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: _chips.map((chip) {
-                    final isActive = chip == _selectedChip;
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        right: Responsive.getResponsiveValue(context, mobile: 8, tablet: 12),
-                      ),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedChip = chip),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: Responsive.getResponsiveValue(context, mobile: 12, tablet: 16),
-                            vertical: Responsive.getResponsiveValue(context, mobile: 6, tablet: 8),
-                          ),
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? const Color(0xFF222222)
-                                : Colors.transparent,
-                            border: Border.all(color: const Color(0xFF222222)),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Text(
-                            chip,
-                            style: TextStyle(
-                              fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
-                              color: isActive
-                                  ? Colors.white
-                                  : const Color(0xFF222222),
+              child: _isLoadingCategories
+                  ? const Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _categories.map((category) {
+                          final isActive = category.slug == _selectedCategorySlug;
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: Responsive.getResponsiveValue(context, mobile: 8, tablet: 12),
                             ),
-                          ),
-                        ),
+                            child: GestureDetector(
+                              onTap: () => _onChipSelected(category.slug),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: Responsive.getResponsiveValue(context, mobile: 12, tablet: 16),
+                                  vertical: Responsive.getResponsiveValue(context, mobile: 6, tablet: 8),
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? const Color(0xFF222222)
+                                      : Colors.transparent,
+                                  border: Border.all(color: const Color(0xFF222222)),
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: Text(
+                                  category.name,
+                                  style: TextStyle(
+                                    fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+                                    color: isActive
+                                        ? Colors.white
+                                        : const Color(0xFF222222),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
+                    ),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Responsive.getResponsiveValue(context, mobile: 16, tablet: 24),
-                ),
-                child: Column(
-                  children: [
-                    _GuideArticle(
-                      imagePath: 'assets/images/guide_article.jpg',
-                      title:
-                          'Today\'s the first day — offer a heating pad and her favorite comfort food.',
-                      description:
-                          'Her period just started. Extra patience and comfort foods can work wonders today...',
-                      phase: 'Menstrual Phase',
-                    ),
-                    const SizedBox(height: 40),
-                    _GuideArticle(
-                      imagePath: 'assets/images/guide_article.jpg',
-                      title:
-                          'Today\'s the first day — offer a heating pad and her favorite comfort food.',
-                      description:
-                          'Her period just started. Extra patience and comfort foods can work wonders today...',
-                      phase: 'Menstrual Phase',
-                    ),
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              ),
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _articles.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No articles found',
+                            style: TextStyle(
+                              fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+                              color: const Color(0xFF888888),
+                            ),
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: Responsive.getResponsiveValue(context, mobile: 16, tablet: 24),
+                          ),
+                          child: Column(
+                            children: [
+                              ..._articles.map((article) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 40),
+                                    child: _GuideArticle(
+                                      article: article,
+                                    ),
+                                  )),
+                              const SizedBox(height: 100),
+                            ],
+                          ),
+                        ),
             ),
             menu.AppMenuBar(
               activeTab: _activeTab,
@@ -139,16 +188,10 @@ class _GuideScreenState extends State<GuideScreen> {
 }
 
 class _GuideArticle extends StatelessWidget {
-  final String imagePath;
-  final String title;
-  final String description;
-  final String phase;
+  final GuideArticle article;
 
   const _GuideArticle({
-    required this.imagePath,
-    required this.title,
-    required this.description,
-    required this.phase,
+    required this.article,
   });
 
   @override
@@ -159,14 +202,25 @@ class _GuideArticle extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           height: 288,
-          child: Image.asset(
-            imagePath,
-            fit: BoxFit.cover,
-          ),
+          child: article.image != null
+              ? Image.network(
+                  article.image!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/guide_article.jpg',
+                      fit: BoxFit.cover,
+                    );
+                  },
+                )
+              : Image.asset(
+                  'assets/images/guide_article.jpg',
+                  fit: BoxFit.cover,
+                ),
         ),
         const SizedBox(height: 14),
         Text(
-          title,
+          article.title,
           style: const TextStyle(
             fontSize: 20,
             height: 1.2,
@@ -175,7 +229,7 @@ class _GuideArticle extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(
-          description,
+          article.description,
           style: const TextStyle(
             fontSize: 16,
             height: 1.25,
@@ -187,7 +241,7 @@ class _GuideArticle extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              phase,
+              article.phase ?? '',
               style: const TextStyle(
                 fontSize: 16,
                 color: Color(0xFF888888),

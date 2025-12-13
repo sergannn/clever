@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../utils/responsive.dart';
 import '../widgets/app_header.dart';
 import '../widgets/menu_bar.dart' as menu;
+import '../services/api_service.dart';
+import '../models/home_content.dart';
 import 'account_screen.dart';
 import 'calendar_screen.dart';
 import 'guide_screen.dart';
@@ -16,6 +18,41 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _activeTab = 'home';
   String _selectedChip = 'Today';
+  List<HomeContent> _contents = [];
+  bool _isLoading = true;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadContents();
+  }
+
+  Future<void> _loadContents() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    try {
+      final contents = await ApiService.getHomeContents();
+      setState(() {
+        _contents = contents;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _nextTip() {
+    if (_contents.isNotEmpty) {
+      setState(() {
+        _currentIndex = (_currentIndex + 1) % _contents.length;
+      });
+    }
+  }
 
   void _navigateToTab(String tab) {
     if (tab == 'calendar') {
@@ -83,80 +120,103 @@ class _HomeScreenState extends State<HomeScreen> {
                     tablet: 24,
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Menstrual Phase',
-                          style: TextStyle(
-                            fontSize: Responsive.getResponsiveFontSize(
-                              context,
-                              mobile: 24,
-                              tablet: 28,
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _contents.isEmpty
+                        ? Center(
+                            child: Text(
+                              'No content available',
+                              style: TextStyle(
+                                fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+                                color: const Color(0xFF888888),
+                              ),
                             ),
-                            height: 1.33,
-                            color: const Color(0xFF222222),
-                          ),
-                        ),
-                        Text(
-                          'Day 1',
-                          style: TextStyle(
-                            fontSize: Responsive.getResponsiveFontSize(
-                              context,
-                              mobile: 16,
-                              tablet: 18,
-                            ),
-                            color: const Color(0xFF222222),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 8, tablet: 10)),
-                    Text(
-                      'Day 1 of 28',
-                      style: TextStyle(
-                        fontSize: Responsive.getResponsiveFontSize(
-                          context,
-                          mobile: 16,
-                          tablet: 18,
-                        ),
-                        color: const Color(0xFF222222),
-                      ),
-                    ),
-                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 27)),
-                    SizedBox(
-                      width: double.infinity,
-                      height: Responsive.getResponsiveValue(
-                        context,
-                        mobile: 220,
-                        tablet: 288,
-                      ),
-                      child: Image.asset(
-                        'assets/images/home_phase.jpg',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 29)),
-                    Text(
-                      'Her period just started. Extra patience and comfort foods can work wonders today.',
-                      style: TextStyle(
-                        fontSize: Responsive.getResponsiveFontSize(
-                          context,
-                          mobile: 20,
-                          tablet: 22,
-                        ),
-                        height: 1.2,
-                        color: const Color(0xFF222222),
-                      ),
-                    ),
-                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 60, tablet: 101)),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: () {},
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    _contents[_currentIndex].phase ?? 'Menstrual Phase',
+                                    style: TextStyle(
+                                      fontSize: Responsive.getResponsiveFontSize(
+                                        context,
+                                        mobile: 24,
+                                        tablet: 28,
+                                      ),
+                                      height: 1.33,
+                                      color: const Color(0xFF222222),
+                                    ),
+                                  ),
+                                  Text(
+                                    _contents[_currentIndex].day ?? 'Day 1',
+                                    style: TextStyle(
+                                      fontSize: Responsive.getResponsiveFontSize(
+                                        context,
+                                        mobile: 16,
+                                        tablet: 18,
+                                      ),
+                                      color: const Color(0xFF222222),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: Responsive.getResponsiveValue(context, mobile: 8, tablet: 10)),
+                              Text(
+                                _contents[_currentIndex].dayOfCycle ?? 'Day 1 of 28',
+                                style: TextStyle(
+                                  fontSize: Responsive.getResponsiveFontSize(
+                                    context,
+                                    mobile: 16,
+                                    tablet: 18,
+                                  ),
+                                  color: const Color(0xFF222222),
+                                ),
+                              ),
+                              SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 27)),
+                              SizedBox(
+                                width: double.infinity,
+                                height: Responsive.getResponsiveValue(
+                                  context,
+                                  mobile: 220,
+                                  tablet: 288,
+                                ),
+                                child: _contents[_currentIndex].image != null
+                                    ? Image.network(
+                                        _contents[_currentIndex].image!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Image.asset(
+                                            'assets/images/home_phase.jpg',
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      )
+                                    : Image.asset(
+                                        'assets/images/home_phase.jpg',
+                                        fit: BoxFit.cover,
+                                      ),
+                              ),
+                              SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 29)),
+                              Text(
+                                _contents[_currentIndex].description,
+                                style: TextStyle(
+                                  fontSize: Responsive.getResponsiveFontSize(
+                                    context,
+                                    mobile: 20,
+                                    tablet: 22,
+                                  ),
+                                  height: 1.2,
+                                  color: const Color(0xFF222222),
+                                ),
+                              ),
+                              SizedBox(height: Responsive.getResponsiveValue(context, mobile: 60, tablet: 101)),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton(
+                                  onPressed: _contents.length > 1 ? _nextTip : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF222222),
                           foregroundColor: Colors.white,
