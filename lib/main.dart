@@ -15,7 +15,7 @@ class CleverApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.grey,
-        fontFamily: 'System',
+        fontFamily: 'FamiljenGrotesk',
         scaffoldBackgroundColor: Colors.white,
       ),
       home: const IntroScreen(),
