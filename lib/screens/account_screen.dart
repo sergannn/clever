@@ -202,6 +202,7 @@ class _NotificationsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Divider(height: 40),
         const Text(
           'Notifications',
           style: TextStyle(
@@ -209,7 +210,6 @@ class _NotificationsSection extends StatelessWidget {
             color: Color(0xFF888888),
           ),
         ),
-        const Divider(height: 40),
         _NotificationItem(
           title: 'Daily reminders',
           description: 'Today\'s tips and phase updates',
@@ -358,12 +358,12 @@ class _ContactSection extends StatelessWidget {
           mainAxisSpacing: 29,
           childAspectRatio: 2,
           children: const [
-            _ContactLink('clever.lifestyle'),
+            _ContactLink('clever.day'),
             _ContactLink('Data Privacy'),
             _ContactLink('LinkedIn'),
             _ContactLink('Legal Notice'),
             _ContactLink('Instagram'),
-            _ContactLink('hi@clever.lifestyle'),
+            _ContactLink('hi@clever.day'),
           ],
         ),
       ],

@@ -65,8 +65,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 0),
+        curve: Curves.linear,
       );
     } else {
       // После onboarding переходим на Login
@@ -88,6 +88,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
       body: PageView.builder(
         controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (index) {
           setState(() {
             _currentPage = index;
@@ -179,7 +180,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         color: const Color(0xFF222222),
                       ),
                     ),
-                    SizedBox(height: isSmallScreen ? 16 : 20),
+                    SizedBox(height: 53),
                     Text(
                       page.description,
                       style: TextStyle(

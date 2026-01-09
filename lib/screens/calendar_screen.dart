@@ -86,7 +86,7 @@ class _CalendarCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFFFFFFF),
         border: Border.all(color: const Color(0xFFDADADA)),
         borderRadius: BorderRadius.circular(24),
       ),
@@ -97,6 +97,7 @@ class _CalendarCard extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.chevron_left),
+                color: const Color(0xFF222222),
                 onPressed: () {},
               ),
               const Text(
@@ -109,6 +110,7 @@ class _CalendarCard extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.chevron_right),
+                color: const Color(0xFF222222),
                 onPressed: () {},
               ),
             ],

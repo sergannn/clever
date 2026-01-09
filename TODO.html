@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clever App - TODO List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #222222 0%, #444444 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            padding: 20px 30px;
+            background: #f9f9f9;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .stat {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #222222;
+        }
+        
+        #completed-tasks {
+            color: #4CAF50;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .section {
+            margin: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .section-header h2 {
+            font-size: 24px;
+            color: #222222;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-clear {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .badge-needs-clarification {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .task {
+            background: #fafafa;
+            border-left: 4px solid #ddd;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .task:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateX(4px);
+        }
+        
+        .task-clear {
+            border-left-color: #4CAF50;
+        }
+        
+        .task-needs-clarification {
+            border-left-color: #FF9800;
+        }
+        
+        .task.completed {
+            opacity: 0.6;
+            background: #f0f0f0;
+        }
+        
+        .task.completed .task-title {
+            text-decoration: line-through;
+            color: #888;
+        }
+        
+        .task-checkbox {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .task-checkbox-label {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            border: 2px solid #4CAF50;
+            border-radius: 4px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        .task-checkbox-label:hover {
+            background: #f0f0f0;
+            transform: scale(1.1);
+        }
+        
+        .task-checkbox:checked + .task-checkbox-label {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        .task-checkbox:checked + .task-checkbox-label::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            padding-right: 40px;
+        }
+        
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #222222;
+            flex: 1;
+        }
+        
+        .task-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .task-file {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .task-description {
+            color: #555;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        
+        .task-notes {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border-left: 3px solid #ffc107;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        .figma-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: #1976d2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .figma-link:hover {
+            text-decoration: underline;
+        }
+        
+        .priority {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .priority-high {
+            background: #f44336;
+            color: white;
+        }
+        
+        .priority-medium {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .priority-low {
+            background: #9e9e9e;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .stats {
+                flex-direction: column;
+            }
+            
+            .task-header {
+                flex-direction: column;
+            }
+            
+            .task-meta {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Clever App - TODO List</h1>
+            <p>Список задач по улучшению приложения</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="total-tasks">0</div>
+                <div class="stat-label">Всего задач</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="clear-tasks">0</div>
+                <div class="stat-label">Понятные задачи</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="clarification-tasks">0</div>
+                <div class="stat-label">Требуют уточнения</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="completed-tasks">0</div>
+                <div class="stat-label">Выполнено</div>
+            </div>
+        </div>
+        
+        <!-- ПОНЯТНЫЕ ЗАДАЧИ -->
+        <div class="section">
+            <div class="section-header">
+                <h2>✅ Понятные задачи (можно делать сразу)</h2>
+                <span class="badge badge-clear">Готово к работе</span>
+            </div>
+            
+            <!-- Calendar -->
+            <div class="task task-clear" data-task-id="calendar-colors">
+                <input type="checkbox" class="task-checkbox" id="task-calendar-colors" onchange="toggleTask('calendar-colors', this.checked)">
+                <label for="task-calendar-colors" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Календарь: Покрасить в цвета приложения
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">calendar_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Покрасить стандартный компонент календаря в цвета приложения.<br>
+                    <strong>Требования:</strong>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>Фон: #FFFFFF</li>
+                        <li>Элементы управления: #222222</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Onboarding: Font -->
+            <div class="task task-clear" data-task-id="onboarding-font">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-font" onchange="toggleTask('onboarding-font', this.checked)">
+                <label for="task-onboarding-font" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг: Заменить шрифт на Familjen Grotesk
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Во всём демо заменить шрифт на Familjen Grotesk.<br>
+                    <strong>Примечание:</strong> Шрифт уже подключен в pubspec.yaml и установлен в main.dart как fontFamily по умолчанию. Нужно проверить, что везде используется.
+                </div>
+            </div>
+            
+            <!-- Onboarding: Spacing -->
+            <div class="task task-clear" data-task-id="onboarding-spacing">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-spacing" onchange="toggleTask('onboarding-spacing', this.checked)">
+                <label for="task-onboarding-spacing" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг: Расстояние между подзаголовком и текстом
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Установить расстояние между подзаголовком и основным текстом 53px.<br>
+                    <strong>Текущее значение:</strong> 16-20px (зависит от размера экрана)
+                </div>
+            </div>
+            
+            <!-- Onboarding: Button spacing -->
+            <div class="task task-clear" data-task-id="onboarding-button-spacing">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-button-spacing" onchange="toggleTask('onboarding-button-spacing', this.checked)">
+                <label for="task-onboarding-button-spacing" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг: Расстояние от нижнего края до кнопки
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Сделать расстояние от нижнего края до кнопки как на первом экране (одинаковое для всех экранов).
+                </div>
+            </div>
+            
+            <!-- Onboarding: Disable swipe -->
+            <div class="task task-clear" data-task-id="onboarding-disable-swipe">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-disable-swipe" onchange="toggleTask('onboarding-disable-swipe', this.checked)">
+                <label for="task-onboarding-disable-swipe" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг: Отключить свайп между экранами
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Отключить возможность перехода между экранами онбординга свайпом. Переход только по нажатию на кнопку Next.<br>
+                    <strong>Решение:</strong> Добавить <code>physics: NeverScrollableScrollPhysics()</code> в PageView.
+                </div>
+            </div>
+            
+            <!-- Onboarding: Disable animation -->
+            <div class="task task-clear" data-task-id="onboarding-disable-animation">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-disable-animation" onchange="toggleTask('onboarding-disable-animation', this.checked)">
+                <label for="task-onboarding-disable-animation" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг: Отключить анимацию перехода
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Отключить анимацию выплывания справа. Сделать инстант переход между экранами.<br>
+                    <strong>Решение:</strong> Изменить <code>duration: Duration(milliseconds: 0)</code> в <code>nextPage()</code>.
+                </div>
+            </div>
+            
+            <!-- Account: Domain change -->
+            <div class="task task-clear" data-task-id="account-domain">
+                <input type="checkbox" class="task-checkbox" id="task-account-domain" onchange="toggleTask('account-domain', this.checked)">
+                <label for="task-account-domain" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Account: Поменять домен на clever.day
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">account_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Заменить домен clever.lifestyle на clever.day, почту на hi@clever.day.<br>
+                    <strong>Текущие значения:</strong>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>'clever.lifestyle' → 'clever.day'</li>
+                        <li>'hi@clever.lifestyle' → 'hi@clever.day'</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Account: Divider position -->
+            <div class="task task-clear" data-task-id="account-divider">
+                <input type="checkbox" class="task-checkbox" id="task-account-divider" onchange="toggleTask('account-divider', this.checked)">
+                <label for="task-account-divider" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Account: Позиция разделительной полоски
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">account_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Разделительная полоска должна быть над текстом подзаголовка "Notifications".<br>
+                    <strong>Текущее состояние:</strong> Divider находится после заголовка "Notifications".
+                </div>
+            </div>
+            
+            <!-- Home: Menu overlap -->
+            <div class="task task-clear" data-task-id="home-menu-overlap">
+                <input type="checkbox" class="task-checkbox" id="task-home-menu-overlap" onchange="toggleTask('home-menu-overlap', this.checked)">
+                <label for="task-home-menu-overlap" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Home: Меню не должно перекрывать кнопку Next Tip
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">home_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Убедиться, что меню не перекрывает кнопку "Next Tip".<br>
+                    <strong>Решение:</strong> Увеличить нижний padding в SingleChildScrollView или изменить позиционирование кнопки.
+                </div>
+            </div>
+        </div>
+        
+        <!-- ЗАДАЧИ, ТРЕБУЮЩИЕ УТОЧНЕНИЯ -->
+        <div class="section">
+            <div class="section-header">
+                <h2>❓ Задачи, требующие уточнения (нужно проверить макет)</h2>
+                <span class="badge badge-needs-clarification">Нужен макет</span>
+            </div>
+            
+            <!-- Onboarding: White field -->
+            <div class="task task-needs-clarification" data-task-id="onboarding-white-field">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-white-field" onchange="toggleTask('onboarding-white-field', this.checked)">
+                <label for="task-onboarding-white-field" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг-1: Убрать белое поле
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Возможно ли убрать белое поле на онбординге? Проверить, как в макете.<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет в Figma, чтобы понять, где именно находится белое поле и как его убрать.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Onboarding: Gray overlay -->
+            <div class="task task-needs-clarification" data-task-id="onboarding-gray-overlay">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-gray-overlay" onchange="toggleTask('onboarding-gray-overlay', this.checked)">
+                <label for="task-onboarding-gray-overlay" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг: Серая плашка на фото
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Фото отображаются с серой плашкой. Нужно проверить макет и исправить.<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет, чтобы понять, должна ли быть плашка или это ошибка отображения.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Onboarding: Element style -->
+            <div class="task task-needs-clarification" data-task-id="onboarding-element-style">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-element-style" onchange="toggleTask('onboarding-element-style', this.checked)">
+                <label for="task-onboarding-element-style" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг: Элемент без заливки, с обводкой
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Этот элемент немного по-другому выглядит. Без заливки, но с обводкой. Проверить расположение элемента с макетом.<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Уточнить, какой именно элемент имеется в виду (возможно, индикаторы страниц или кнопка).
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Home: White fields -->
+            <div class="task task-needs-clarification" data-task-id="home-white-fields">
+                <input type="checkbox" class="task-checkbox" id="task-home-white-fields" onchange="toggleTask('home-white-fields', this.checked)">
+                <label for="task-home-white-fields" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Home: Убрать белые поля
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">home_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Здесь не должно быть белых полей, проверить, как в макете.<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет Home screen в Figma, чтобы понять, где именно находятся белые поля и какой должен быть фон.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Guide: Article spacing -->
+            <div class="task task-needs-clarification" data-task-id="guide-article-spacing">
+                <input type="checkbox" class="task-checkbox" id="task-guide-article-spacing" onchange="toggleTask('guide-article-spacing', this.checked)">
+                <label for="task-guide-article-spacing" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Guide: Расстояние между статьями
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">guide_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Проверить расстояние между статьями.<br>
+                    <strong>Текущее значение:</strong> 40px (const EdgeInsets.only(bottom: 40))<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет, чтобы узнать точное значение расстояния.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Guide: White fields -->
+            <div class="task task-needs-clarification" data-task-id="guide-white-fields">
+                <input type="checkbox" class="task-checkbox" id="task-guide-white-fields" onchange="toggleTask('guide-white-fields', this.checked)">
+                <label for="task-guide-white-fields" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Guide: Убрать белые поля
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">guide_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Нет белых полей, проверить, как в макете.<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет Guide screen в Figma.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Guide: Chips overflow -->
+            <div class="task task-needs-clarification" data-task-id="guide-chips-overflow">
+                <input type="checkbox" class="task-checkbox" id="task-guide-chips-overflow" onchange="toggleTask('guide-chips-overflow', this.checked)">
+                <label for="task-guide-chips-overflow" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Guide: Чипсы должны уходить за край
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">guide_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Чипсы должны уходить за край, должно быть без белого поля. Проверить, как в макетах.<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет, чтобы понять, как должны выглядеть чипсы (возможно, нужно убрать padding или сделать overflow).
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account: Card spacing -->
+            <div class="task task-needs-clarification" data-task-id="account-card-spacing">
+                <input type="checkbox" class="task-checkbox" id="task-account-card-spacing" onchange="toggleTask('account-card-spacing', this.checked)">
+                <label for="task-account-card-spacing" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Account: Расстояние между элементами в карточке
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">account_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Проверить расстояние между элементами в карточке.<br>
+                    <strong>Текущие значения:</strong>
+                    <ul style="margin-left: 20px; margin-top: 8px;">
+                        <li>Между InfoRow: 8px</li>
+                        <li>Между секциями: 40px</li>
+                    </ul>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет Account screen в Figma.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account: Add icon -->
+            <div class="task task-needs-clarification" data-task-id="account-add-icon">
+                <input type="checkbox" class="task-checkbox" id="task-account-add-icon" onchange="toggleTask('account-add-icon', this.checked)">
+                <label for="task-account-add-icon" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Account: Добавить иконку
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">account_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Добавить иконку (в карточке Account Info).<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Уточнить, какую именно иконку и где именно её разместить. Проверить макет.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account: Share feedback -->
+            <div class="task task-needs-clarification" data-task-id="account-share-feedback">
+                <input type="checkbox" class="task-checkbox" id="task-account-share-feedback" onchange="toggleTask('account-share-feedback', this.checked)">
+                <label for="task-account-share-feedback" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Account: Заменить "Share your feedback"
+                        <span class="priority priority-low">Низкий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">account_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Этот элемент во всю ширину экрана, но для PoC его можно вообще убрать или заменить кнопкой. Есть новый макет с кнопкой.<br>
+                    <a href="https://www.figma.com/design/EOJFP8btwEykSsvNAlk9DA/Clever?node-id=679-714&t=YqsMw8RCKCwhODNX-4" class="figma-link" target="_blank">🔗 Открыть макет в Figma</a><br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Посмотреть новый макет и реализовать кнопку согласно дизайну.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account: Switchers design -->
+            <div class="task task-needs-clarification" data-task-id="account-switchers">
+                <input type="checkbox" class="task-checkbox" id="task-account-switchers" onchange="toggleTask('account-switchers', this.checked)">
+                <label for="task-account-switchers" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Account: Дизайн свитчеров
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">account_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Проверить дизайн свитчеров, они выглядят немного по-другому в макете.<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет, чтобы понять, как должны выглядеть Switch компоненты (цвета, размеры, стиль).
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Account: General spacing -->
+            <div class="task task-needs-clarification" data-task-id="account-general-spacing">
+                <input type="checkbox" class="task-checkbox" id="task-account-general-spacing" onchange="toggleTask('account-general-spacing', this.checked)">
+                <label for="task-account-general-spacing" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Account: Расстояния между элементами
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="task-file">account_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Проверить расстояния между элементами.<br>
+                    <div class="task-notes">
+                        <strong>⚠️ Требуется:</strong> Проверить макет Account screen в Figma для точных значений отступов.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="padding: 30px; background: #f9f9f9; border-top: 2px solid #e0e0e0;">
+            <h3 style="margin-bottom: 15px; color: #222222;">📝 Примечания</h3>
+            <ul style="color: #555; line-height: 1.8; margin-left: 20px;">
+                <li>В проекте используется MTP Figma для работы с макетами</li>
+                <li>Иконки и картинки находятся в папке <code>assets/</code></li>
+                <li>Шрифт Familjen Grotesk уже подключен в <code>pubspec.yaml</code> и установлен в <code>main.dart</code></li>
+                <li>Для задач, требующих уточнения, нужно проверить макеты в Figma</li>
+                <li>Пользователь может изменить макеты, если нужно</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Загрузка сохраненных состояний задач
+        function loadTasks() {
+            const savedTasks = JSON.parse(localStorage.getItem('clever-todo-tasks') || '{}');
+            Object.keys(savedTasks).forEach(taskId => {
+                if (savedTasks[taskId]) {
+                    const checkbox = document.getElementById(`task-${taskId}`);
+                    const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+                    if (checkbox && taskElement) {
+                        checkbox.checked = true;
+                        taskElement.classList.add('completed');
+                    }
+                }
+            });
+            updateStats();
+        }
+        
+        // Сохранение состояния задачи
+        function toggleTask(taskId, isCompleted) {
+            const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+            const savedTasks = JSON.parse(localStorage.getItem('clever-todo-tasks') || '{}');
+            
+            if (isCompleted) {
+                taskElement.classList.add('completed');
+                savedTasks[taskId] = true;
+            } else {
+                taskElement.classList.remove('completed');
+                delete savedTasks[taskId];
+            }
+            
+            localStorage.setItem('clever-todo-tasks', JSON.stringify(savedTasks));
+            updateStats();
+        }
+        
+        // Обновление статистики
+        function updateStats() {
+            const allTasks = document.querySelectorAll('.task');
+            const completedTasks = document.querySelectorAll('.task.completed').length;
+            const clearTasks = document.querySelectorAll('.task-clear:not(.completed)').length;
+            const clarificationTasks = document.querySelectorAll('.task-needs-clarification:not(.completed)').length;
+            const totalTasks = allTasks.length;
+            
+            document.getElementById('total-tasks').textContent = totalTasks;
+            document.getElementById('clear-tasks').textContent = clearTasks;
+            document.getElementById('clarification-tasks').textContent = clarificationTasks;
+            document.getElementById('completed-tasks').textContent = completedTasks;
+        }
+        
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Автоматически отмечаем уже выполненные задачи при первой загрузке
+            const savedTasks = JSON.parse(localStorage.getItem('clever-todo-tasks') || '{}');
+            const completedTasks = [
+                'calendar-colors',
+                'onboarding-spacing',
+                'onboarding-disable-swipe',
+                'onboarding-disable-animation',
+                'account-domain',
+                'account-divider',
+                'home-menu-overlap'
+            ];
+            
+            // Отмечаем выполненные задачи, если они еще не отмечены
+            let hasChanges = false;
+            completedTasks.forEach(taskId => {
+                if (!savedTasks[taskId]) {
+                    savedTasks[taskId] = true;
+                    hasChanges = true;
+                }
+            });
+            
+            if (hasChanges) {
+                localStorage.setItem('clever-todo-tasks', JSON.stringify(savedTasks));
+            }
+            
+            loadTasks();
+        });
+    </script>
+</body>
+</html>

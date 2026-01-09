@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 60, tablet: 100)),
+                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 120, tablet: 140)),
                   ],
                 ),
               ),
