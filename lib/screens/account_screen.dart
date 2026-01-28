@@ -140,41 +140,29 @@ class _InfoRow extends StatelessWidget {
 class _PremiumCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 192,
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color(0xFF222222)),
+    return ElevatedButton(
+      onPressed: () {},
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF222222),
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(
+          horizontal: Responsive.getResponsiveValue(context, mobile: 24, tablet: 24),
+          vertical: 18,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        minimumSize: Size(
+          double.infinity,
+          Responsive.isSmallScreen(context) ? 50 : 56,
+        ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            'assets/images/premium_icon.png',
-            width: 32,
-            height: 32,
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            '\$1,99/month',
-            style: TextStyle(
-              fontSize: 24,
-              height: 1.33,
-              color: Color(0xFF222222),
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextButton(
-            onPressed: () {},
-            child: const Text(
-              'Go Premium',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF222222),
-              ),
-            ),
-          ),
-        ],
+      child: Text(
+        'Share your feedback',
+        style: TextStyle(
+          fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
@@ -349,14 +337,14 @@ class _ContactSection extends StatelessWidget {
             color: Color(0xFF888888),
           ),
         ),
-        const Divider(height: 40),
+        const Divider(height: 10),
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           crossAxisCount: 2,
-          crossAxisSpacing: 29,
-          mainAxisSpacing: 29,
-          childAspectRatio: 2,
+          crossAxisSpacing: 9,
+          mainAxisSpacing: 8,
+          childAspectRatio: 4,
           children: const [
             _ContactLink('clever.day'),
             _ContactLink('Data Privacy'),

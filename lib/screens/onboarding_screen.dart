@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/responsive.dart';
 import 'login_screen.dart';
 
@@ -65,7 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _nextPage() {
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 0),
+        duration: const Duration(milliseconds: 1),
         curve: Curves.linear,
       );
     } else {
@@ -81,11 +82,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        toolbarHeight: 0,
-      ),
       body: PageView.builder(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
@@ -136,19 +132,25 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         );
                       },
                     ),
-                    SafeArea(
-                      bottom: false,
-                      child: Positioned(
-                        top: isSmallScreen ? 20 : 38,
-                        left: 0,
-                        right: 0,
+                    // Логотип по центру наверху на изображении
+                    Positioned(
+                      top: isSmallScreen ? 16 : 24,
+                      left: 0,
+                      right: 0,
+                      child: SafeArea(
+                        bottom: false,
                         child: Center(
-                          child: Image.asset(
-                            page.iconPath,
-                            width: 32,
-                            height: 32,
+                          child: SvgPicture.asset(
+                            'assets/images/Clever_AIcontent.svg',
+                            width: 48,
+                            height: 48,
+                            placeholderBuilder: (context) => const SizedBox(
+                              width: 48,
+                              height: 48,
+                              child: CircularProgressIndicator(color: Colors.white),
+                            ),
                             errorBuilder: (context, error, stackTrace) {
-                              return const SizedBox(width: 32, height: 32);
+                              return const SizedBox(width: 48, height: 48);
                             },
                           ),
                         ),
@@ -168,17 +170,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      page.title,
-                      style: TextStyle(
-                        fontSize: Responsive.getResponsiveFontSize(
-                          context,
-                          mobile: 16,
-                          tablet: 18,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            page.title,
+                            style: TextStyle(
+                              fontSize: Responsive.getResponsiveFontSize(
+                                context,
+                                mobile: 16,
+                                tablet: 18,
+                              ),
+                              height: 1.25,
+                              color: const Color(0xFF222222),
+                            ),
+                          ),
                         ),
-                        height: 1.25,
-                        color: const Color(0xFF222222),
-                      ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                            _pages.length,
+                            (index) => Container(
+                              width: 8,
+                              height: 8,
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFF222222),
+                                  width: index == _currentPage ? 2 : 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 53),
                     Text(
@@ -193,96 +221,73 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         color: const Color(0xFF222222),
                       ),
                     ),
-                    SizedBox(height: isSmallScreen ? 16 : 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        _pages.length,
-                        (index) => Container(
-                          width: 8,
-                          height: 8,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(3),
-                            color: index == _currentPage
-                                ? const Color(0xFF222222)
-                                : const Color(0xFFA0A0A0),
-                            border: Border.all(
-                              color: index == _currentPage
-                                  ? const Color(0xFF222222)
-                                  : const Color(0xFFA0A0A0),
+                    SizedBox(height: Responsive.getResponsiveValue(
+                      context,
+                      mobile: 100,
+                      tablet: 120,
+                    )),
+                    Center(
+                      child: SizedBox(
+                        width: Responsive.getResponsiveValue(
+                          context,
+                          mobile: double.infinity,
+                          tablet: 343,
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _nextPage,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF222222),
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: Responsive.getResponsiveValue(
+                                context,
+                                mobile: 24,
+                                tablet: 24,
+                              ),
+                              vertical: 18,
                             ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            minimumSize: Size(
+                              Responsive.getResponsiveValue(
+                                context,
+                                mobile: double.infinity,
+                                tablet: 343,
+                              ),
+                              isSmallScreen ? 50 : 56,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _currentPage < _pages.length - 1 ? 'Next' : 'Get started',
+                                style: TextStyle(
+                                  fontSize: Responsive.getResponsiveFontSize(
+                                    context,
+                                    mobile: 16,
+                                    tablet: 18,
+                                  ),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.chevron_right, size: 20),
+                            ],
                           ),
                         ),
                       ),
                     ),
                     SizedBox(height: Responsive.getResponsiveValue(
                       context,
-                      mobile: 100,
-                      tablet: 120,
+                      mobile: 20,
+                      tablet: 24,
                     )),
                   ],
                 ),
               ),
             ],
-          ),
-        ),
-        // Кнопка всегда справа внизу
-        Positioned(
-          bottom: Responsive.getResponsiveValue(
-            context,
-            mobile: 20,
-            tablet: 24,
-          ),
-          right: Responsive.getResponsiveValue(
-            context,
-            mobile: 16,
-            tablet: 20,
-          ),
-          child: ElevatedButton(
-            onPressed: _nextPage,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF222222),
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(
-                horizontal: Responsive.getResponsiveValue(
-                  context,
-                  mobile: 24,
-                  tablet: 24,
-                ),
-                vertical: 18,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-              minimumSize: Size(
-                Responsive.getResponsiveValue(
-                  context,
-                  mobile: 109,
-                  tablet: 120,
-                ),
-                isSmallScreen ? 50 : 56,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _currentPage < _pages.length - 1 ? 'Next' : 'Get started',
-                  style: TextStyle(
-                    fontSize: Responsive.getResponsiveFontSize(
-                      context,
-                      mobile: 16,
-                      tablet: 18,
-                    ),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, size: 20),
-              ],
-            ),
           ),
         ),
       ],

@@ -125,12 +125,17 @@ class _SetupScreenState extends State<SetupScreen> {
           children: [
               SizedBox(height: isSmallScreen ? 20 : 38),
               Center(
-                child: Image.asset(
-                  'assets/images/setup1_favicon.png',
-                  width: 32,
-                  height: 32,
+                child: SvgPicture.asset(
+                  'assets/images/Clever_AIcontent.svg',
+                  width: 48,
+                  height: 48,
+                  placeholderBuilder: (context) => const SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: CircularProgressIndicator(color: Colors.grey),
+                  ),
                   errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox(width: 32, height: 32);
+                    return const SizedBox(width: 48, height: 48);
                   },
                 ),
               ),
@@ -272,10 +277,17 @@ class _SetupScreenState extends State<SetupScreen> {
               SizedBox(height: isSmallScreen ? 20 : 38),
               Center(
                 child: SvgPicture.asset(
-                  'assets/images/setup_favicon.svg',
-                  width: 32,
-                  height: 32,
-                  placeholderBuilder: (context) => const SizedBox(width: 32, height: 32),
+                  'assets/images/Clever_AIcontent.svg',
+                  width: 48,
+                  height: 48,
+                  placeholderBuilder: (context) => const SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: CircularProgressIndicator(color: Colors.grey),
+                  ),
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox(width: 48, height: 48);
+                  },
                 ),
               ),
               SizedBox(height: isSmallScreen ? 60 : 138),
@@ -426,10 +438,17 @@ class _SetupScreenState extends State<SetupScreen> {
               SizedBox(height: isSmallScreen ? 20 : 38),
               Center(
                 child: SvgPicture.asset(
-                  'assets/images/setup_favicon.svg',
-                  width: 32,
-                  height: 32,
-                  placeholderBuilder: (context) => const SizedBox(width: 32, height: 32),
+                  'assets/images/Clever_AIcontent.svg',
+                  width: 48,
+                  height: 48,
+                  placeholderBuilder: (context) => const SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: CircularProgressIndicator(color: Colors.grey),
+                  ),
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox(width: 48, height: 48);
+                  },
                 ),
               ),
               SizedBox(height: isSmallScreen ? 60 : 138),
@@ -573,10 +592,17 @@ class _SetupScreenState extends State<SetupScreen> {
               SizedBox(height: isSmallScreen ? 20 : 38),
               Center(
                 child: SvgPicture.asset(
-                  'assets/images/setup_favicon.svg',
-                  width: 32,
-                  height: 32,
-                  placeholderBuilder: (context) => const SizedBox(width: 32, height: 32),
+                  'assets/images/Clever_AIcontent.svg',
+                  width: 48,
+                  height: 48,
+                  placeholderBuilder: (context) => const SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: CircularProgressIndicator(color: Colors.grey),
+                  ),
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox(width: 48, height: 48);
+                  },
                 ),
               ),
               SizedBox(height: isSmallScreen ? 60 : 138),

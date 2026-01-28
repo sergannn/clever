@@ -358,7 +358,7 @@
                 </div>
                 <div class="task-description">
                     <strong>Задача:</strong> Во всём демо заменить шрифт на Familjen Grotesk.<br>
-                    <strong>Примечание:</strong> Шрифт уже подключен в pubspec.yaml и установлен в main.dart как fontFamily по умолчанию. Нужно проверить, что везде используется.
+                    <strong>Статус:</strong> ✅ Уже реализовано глобально в main.dart (fontFamily: 'FamiljenGrotesk')
                 </div>
             </div>
             
@@ -368,7 +368,7 @@
                 <label for="task-onboarding-spacing" class="task-checkbox-label"></label>
                 <div class="task-header">
                     <div class="task-title">
-                        Онбординг: Расстояние между подзаголовком и текстом
+                        Онбординг: Расстояние между подзаголовком и текстом 53px
                         <span class="priority priority-medium">Средний</span>
                     </div>
                     <div class="task-meta">
@@ -377,8 +377,8 @@
                     </div>
                 </div>
                 <div class="task-description">
-                    <strong>Задача:</strong> Установить расстояние между подзаголовком и основным текстом 53px.<br>
-                    <strong>Текущее значение:</strong> 16-20px (зависит от размера экрана)
+                    <strong>Задача:</strong> Установить расстояние между подзаголовком и основным текстом 53px (между "Understanding Periods" и описанием).<br>
+                    <strong>Статус:</strong> ✅ Уже реализовано в коде
                 </div>
             </div>
             
@@ -491,7 +491,7 @@
                 <label for="task-home-menu-overlap" class="task-checkbox-label"></label>
                 <div class="task-header">
                     <div class="task-title">
-                        Home: Меню не должно перекрывать кнопку Next Tip
+                        Home: Кнопка Next Tip не должна перекрывать нижнее меню
                         <span class="priority priority-high">Высокий</span>
                     </div>
                     <div class="task-meta">
@@ -500,8 +500,47 @@
                     </div>
                 </div>
                 <div class="task-description">
-                    <strong>Задача:</strong> Убедиться, что меню не перекрывает кнопку "Next Tip".<br>
-                    <strong>Решение:</strong> Увеличить нижний padding в SingleChildScrollView или изменить позиционирование кнопки.
+                    <strong>Задача:</strong> Увеличить отступ кнопки "Next Tip" от нижнего меню.<br>
+                    <strong>Решение:</strong> Увеличил нижний отступ с 60/101px до 120/140px.
+                </div>
+            </div>
+
+            <!-- Home: Full width image -->
+            <div class="task task-clear" data-task-id="home-full-width-image">
+                <input type="checkbox" class="task-checkbox" id="task-home-full-width-image" onchange="toggleTask('home-full-width-image', this.checked)">
+                <label for="task-home-full-width-image" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Home: Фотография на весь экран по ширине
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">home_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Фотография должна быть без отступов справа и слева - на весь экран по ширине.<br>
+                    <strong>Статус:</strong> ✅ Фотография имеет width: double.infinity и размещена вне padding-контейнеров.
+                </div>
+            </div>
+
+            <!-- Intro: Logo layout -->
+            <div class="task task-clear" data-task-id="intro-logo-layout">
+                <input type="checkbox" class="task-checkbox" id="task-intro-logo-layout" onchange="toggleTask('intro-logo-layout', this.checked)">
+                <label for="task-intro-logo-layout" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Intro: Разместить логотип и текст с интервалом 16px
+                        <span class="priority priority-high">Высокий</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">intro_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> На первом экране разместить текст "Clever" с SVG логотипом (Clever_AIcontent.svg) справа по центру по горизонтали, текст "smart..." под этой строкой с интервалом 16px.
                 </div>
             </div>
         </div>
@@ -514,24 +553,22 @@
             </div>
             
             <!-- Onboarding: White field -->
-            <div class="task task-needs-clarification" data-task-id="onboarding-white-field">
+            <div class="task task-clear" data-task-id="onboarding-white-field">
                 <input type="checkbox" class="task-checkbox" id="task-onboarding-white-field" onchange="toggleTask('onboarding-white-field', this.checked)">
                 <label for="task-onboarding-white-field" class="task-checkbox-label"></label>
                 <div class="task-header">
                     <div class="task-title">
-                        Онбординг-1: Убрать белое поле
+                        Онбординг: Убрать белое поле наверху
                         <span class="priority priority-high">Высокий</span>
                     </div>
                     <div class="task-meta">
-                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="badge badge-clear">Понятно</span>
                         <span class="task-file">onboarding_screen.dart</span>
                     </div>
                 </div>
                 <div class="task-description">
-                    <strong>Задача:</strong> Возможно ли убрать белое поле на онбординге? Проверить, как в макете.<br>
-                    <div class="task-notes">
-                        <strong>⚠️ Требуется:</strong> Проверить макет в Figma, чтобы понять, где именно находится белое поле и как его убрать.
-                    </div>
+                    <strong>Задача:</strong> Убрать белое поле наверху на экране онбординга.<br>
+                    <strong>Решение:</strong> Убрал AppBar из Scaffold в onboarding_screen.dart
                 </div>
             </div>
             
@@ -647,24 +684,42 @@
             </div>
             
             <!-- Guide: Chips overflow -->
-            <div class="task task-needs-clarification" data-task-id="guide-chips-overflow">
+            <div class="task task-clear" data-task-id="guide-chips-overflow">
                 <input type="checkbox" class="task-checkbox" id="task-guide-chips-overflow" onchange="toggleTask('guide-chips-overflow', this.checked)">
                 <label for="task-guide-chips-overflow" class="task-checkbox-label"></label>
                 <div class="task-header">
                     <div class="task-title">
-                        Guide: Чипсы должны уходить за край
+                        Guide: Убрать белое поле справа от табов
                         <span class="priority priority-medium">Средний</span>
                     </div>
                     <div class="task-meta">
-                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="badge badge-clear">Понятно</span>
                         <span class="task-file">guide_screen.dart</span>
                     </div>
                 </div>
                 <div class="task-description">
-                    <strong>Задача:</strong> Чипсы должны уходить за край, должно быть без белого поля. Проверить, как в макетах.<br>
-                    <div class="task-notes">
-                        <strong>⚠️ Требуется:</strong> Проверить макет, чтобы понять, как должны выглядеть чипсы (возможно, нужно убрать padding или сделать overflow).
+                    <strong>Задача:</strong> Убрать белое поле справа от табов "All Today" - табы должны доходить до правого края.<br>
+                    <strong>Решение:</strong> Убрал правый padding у контейнера с табами в guide_screen.dart.
+                </div>
+            </div>
+
+            <!-- Guide: Full width images -->
+            <div class="task task-clear" data-task-id="guide-full-width-images">
+                <input type="checkbox" class="task-checkbox" id="task-guide-full-width-images" onchange="toggleTask('guide-full-width-images', this.checked)">
+                <label for="task-guide-full-width-images" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Guide: Фотографии на всю ширину экрана
+                        <span class="priority priority-medium">Средний</span>
                     </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">guide_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Сделать фотографии статей на весь экран без боковых отступов.<br>
+                    <strong>Решение:</strong> Вынес фотографии из padding-контейнера, оставил только текст с отступами.
                 </div>
             </div>
             
@@ -718,25 +773,22 @@
             </div>
             
             <!-- Account: Share feedback -->
-            <div class="task task-needs-clarification" data-task-id="account-share-feedback">
+            <div class="task task-clear" data-task-id="account-share-feedback">
                 <input type="checkbox" class="task-checkbox" id="task-account-share-feedback" onchange="toggleTask('account-share-feedback', this.checked)">
                 <label for="task-account-share-feedback" class="task-checkbox-label"></label>
                 <div class="task-header">
                     <div class="task-title">
-                        Account: Заменить "Share your feedback"
-                        <span class="priority priority-low">Низкий</span>
+                        Account: Заменить Premium Card на кнопку "Share your feedback"
+                        <span class="priority priority-medium">Средний</span>
                     </div>
                     <div class="task-meta">
-                        <span class="badge badge-needs-clarification">Нужен макет</span>
+                        <span class="badge badge-clear">Понятно</span>
                         <span class="task-file">account_screen.dart</span>
                     </div>
                 </div>
                 <div class="task-description">
-                    <strong>Задача:</strong> Этот элемент во всю ширину экрана, но для PoC его можно вообще убрать или заменить кнопкой. Есть новый макет с кнопкой.<br>
-                    <a href="https://www.figma.com/design/EOJFP8btwEykSsvNAlk9DA/Clever?node-id=679-714&t=YqsMw8RCKCwhODNX-4" class="figma-link" target="_blank">🔗 Открыть макет в Figma</a><br>
-                    <div class="task-notes">
-                        <strong>⚠️ Требуется:</strong> Посмотреть новый макет и реализовать кнопку согласно дизайну.
-                    </div>
+                    <strong>Задача:</strong> Убрать "$1,99/month" и прямоугольник Premium Card, заменить на черную кнопку на всю ширину со скругленными углами с надписью "Share your feedback".<br>
+                    <strong>Решение:</strong> Заменил _PremiumCard на ElevatedButton с черным фоном, скругленными углами и текстом "Share your feedback".
                 </div>
             </div>
             
@@ -783,8 +835,28 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Onboarding: Button position -->
+            <div class="task task-clear" data-task-id="onboarding-button-position">
+                <input type="checkbox" class="task-checkbox" id="task-onboarding-button-position" onchange="toggleTask('onboarding-button-position', this.checked)">
+                <label for="task-onboarding-button-position" class="task-checkbox-label"></label>
+                <div class="task-header">
+                    <div class="task-title">
+                        Онбординг: Кнопка Next как Get started
+                        <span class="priority priority-medium">Средний</span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="badge badge-clear">Понятно</span>
+                        <span class="task-file">onboarding_screen.dart</span>
+                    </div>
+                </div>
+                <div class="task-description">
+                    <strong>Задача:</strong> Кнопка Next должна располагаться так же, как кнопка Get started - центрирована внизу с отступами.<br>
+                    <strong>Решение:</strong> Переместил кнопку Next из Positioned в центр контента с теми же стилями, что и Get started.
+                </div>
+            </div>
         </div>
-        
+
         <div style="padding: 30px; background: #f9f9f9; border-top: 2px solid #e0e0e0;">
             <h3 style="margin-bottom: 15px; color: #222222;">📝 Примечания</h3>
             <ul style="color: #555; line-height: 1.8; margin-left: 20px;">
@@ -854,9 +926,17 @@
                 'onboarding-spacing',
                 'onboarding-disable-swipe',
                 'onboarding-disable-animation',
+                'onboarding-white-field',
+                'onboarding-page-indicators',
+                'onboarding-button-position',
+                'guide-chips-overflow',
+                'guide-full-width-images',
                 'account-domain',
                 'account-divider',
-                'home-menu-overlap'
+                'account-share-feedback',
+                'home-menu-overlap',
+                'home-full-width-image',
+                'intro-logo-layout'
             ];
             
             // Отмечаем выполненные задачи, если они еще не отмечены

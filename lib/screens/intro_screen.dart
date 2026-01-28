@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/responsive.dart';
-import '../widgets/logo.dart';
 import 'onboarding_screen.dart';
 
 class IntroScreen extends StatelessWidget {
@@ -50,19 +50,64 @@ class IntroScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Logo "Clever" сверху
-                  const Logo(isWhite: true),
-                  SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 40)),
-                  Text(
-                    'The smart way to understand her cycle, moods,\nand energy — so you can connect deeper every day.',
-                    style: TextStyle(
-                      fontSize: Responsive.getResponsiveFontSize(
-                        context,
-                        mobile: 16,
-                        tablet: 18,
-                      ),
-                      height: 1.25,
-                      color: Colors.white,
+                  // Логотип по центру вверху
+                  Center(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Надпись "Clever" слева
+                            Text(
+                              'Clever',
+                              style: TextStyle(
+                                fontSize: Responsive.getResponsiveFontSize(
+                                  context,
+                                  mobile: 24,
+                                  tablet: 28,
+                                ),
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            // SVG логотип справа
+                            SvgPicture.asset(
+                              'assets/images/Clever_AIcontent.svg',
+                              width: 24,
+                              height: 24,
+                              placeholderBuilder: (context) => const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(color: Colors.white),
+                              ),
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Text(
+                                  '•',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                        // Текст "smart..." под логотипом
+                        const SizedBox(height: 16),
+                        Text(
+                          'The smart way to understand her cycle, moods,\nand energy — so you can connect deeper every day.',
+                          style: TextStyle(
+                            fontSize: Responsive.getResponsiveFontSize(
+                              context,
+                              mobile: 16,
+                              tablet: 18,
+                            ),
+                            height: 1.25,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Center(

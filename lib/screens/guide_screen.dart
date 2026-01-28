@@ -101,9 +101,11 @@ class _GuideScreenState extends State<GuideScreen> {
               },
             ),
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: Responsive.getResponsiveValue(context, mobile: 16, tablet: 24),
-                vertical: Responsive.getResponsiveValue(context, mobile: 32, tablet: 52),
+              padding: EdgeInsets.only(
+                left: Responsive.getResponsiveValue(context, mobile: 16, tablet: 24),
+                right: 0,
+                top: Responsive.getResponsiveValue(context, mobile: 32, tablet: 52),
+                bottom: Responsive.getResponsiveValue(context, mobile: 32, tablet: 52),
               ),
               child: _isLoadingCategories
                   ? const Center(child: CircularProgressIndicator())
@@ -160,9 +162,6 @@ class _GuideScreenState extends State<GuideScreen> {
                           ),
                         )
                       : SingleChildScrollView(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: Responsive.getResponsiveValue(context, mobile: 16, tablet: 24),
-                          ),
                           child: Column(
                             children: [
                               ..._articles.map((article) => Padding(
@@ -199,6 +198,7 @@ class _GuideArticle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Фотография на всю ширину
         SizedBox(
           width: double.infinity,
           height: 288,
@@ -218,44 +218,55 @@ class _GuideArticle extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
         ),
-        const SizedBox(height: 14),
-        Text(
-          article.title,
-          style: const TextStyle(
-            fontSize: 20,
-            height: 1.2,
-            color: Color(0xFF222222),
+        // Текст с отступами
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: Responsive.getResponsiveValue(context, mobile: 16, tablet: 24),
           ),
-        ),
-        const SizedBox(height: 14),
-        Text(
-          article.description,
-          style: const TextStyle(
-            fontSize: 16,
-            height: 1.25,
-            color: Color(0xFF222222),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 14),
+              Text(
+                article.title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  height: 1.2,
+                  color: Color(0xFF222222),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                article.description,
+                style: const TextStyle(
+                  fontSize: 16,
+                  height: 1.25,
+                  color: Color(0xFF222222),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    article.phase ?? '',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF888888),
+                    ),
+                  ),
+                  const Text(
+                    'Read more',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF222222),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 14),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              article.phase ?? '',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF888888),
-              ),
-            ),
-            const Text(
-              'Read more',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF222222),
-              ),
-            ),
-          ],
         ),
       ],
     );

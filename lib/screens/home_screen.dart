@@ -112,145 +112,153 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(
-                  horizontal: Responsive.getResponsiveValue(
-                    context,
-                    mobile: 17,
-                    tablet: 24,
-                  ),
-                ),
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _contents.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No content available',
-                              style: TextStyle(
-                                fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
-                                color: const Color(0xFF888888),
-                              ),
-                            ),
+              child: Column(
+                children: [
+                  // Фотография на всю ширину экрана
+                  SizedBox(
+                    width: double.infinity,
+                    height: Responsive.getResponsiveValue(
+                      context,
+                      mobile: 220,
+                      tablet: 288,
+                    ),
+                    child: _contents.isNotEmpty && _contents[_currentIndex].image != null
+                        ? Image.network(
+                            _contents[_currentIndex].image!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                'assets/images/home_phase.jpg',
+                                fit: BoxFit.cover,
+                              );
+                            },
                           )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _contents[_currentIndex].phase ?? 'Menstrual Phase',
-                                    style: TextStyle(
-                                      fontSize: Responsive.getResponsiveFontSize(
-                                        context,
-                                        mobile: 24,
-                                        tablet: 28,
-                                      ),
-                                      height: 1.33,
-                                      color: const Color(0xFF222222),
-                                    ),
-                                  ),
-                                  Text(
-                                    _contents[_currentIndex].day ?? 'Day 1',
-                                    style: TextStyle(
-                                      fontSize: Responsive.getResponsiveFontSize(
-                                        context,
-                                        mobile: 16,
-                                        tablet: 18,
-                                      ),
-                                      color: const Color(0xFF222222),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: Responsive.getResponsiveValue(context, mobile: 8, tablet: 10)),
-                              Text(
-                                _contents[_currentIndex].dayOfCycle ?? 'Day 1 of 28',
-                                style: TextStyle(
-                                  fontSize: Responsive.getResponsiveFontSize(
-                                    context,
-                                    mobile: 16,
-                                    tablet: 18,
-                                  ),
-                                  color: const Color(0xFF222222),
-                                ),
-                              ),
-                              SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 27)),
-                              SizedBox(
-                                width: double.infinity,
-                                height: Responsive.getResponsiveValue(
-                                  context,
-                                  mobile: 220,
-                                  tablet: 288,
-                                ),
-                                child: _contents[_currentIndex].image != null
-                                    ? Image.network(
-                                        _contents[_currentIndex].image!,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Image.asset(
-                                            'assets/images/home_phase.jpg',
-                                            fit: BoxFit.cover,
-                                          );
-                                        },
-                                      )
-                                    : Image.asset(
-                                        'assets/images/home_phase.jpg',
-                                        fit: BoxFit.cover,
-                                      ),
-                              ),
-                              SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 29)),
-                              Text(
-                                _contents[_currentIndex].description,
-                                style: TextStyle(
-                                  fontSize: Responsive.getResponsiveFontSize(
-                                    context,
-                                    mobile: 20,
-                                    tablet: 22,
-                                  ),
-                                  height: 1.2,
-                                  color: const Color(0xFF222222),
-                                ),
-                              ),
-                              SizedBox(height: Responsive.getResponsiveValue(context, mobile: 60, tablet: 101)),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: ElevatedButton(
-                                  onPressed: _contents.length > 1 ? _nextTip : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF222222),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: Responsive.getResponsiveValue(context, mobile: 24, tablet: 24),
-                            vertical: 18,
+                        : Image.asset(
+                            'assets/images/home_phase.jpg',
+                            fit: BoxFit.cover,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          minimumSize: Size(
-                            Responsive.getResponsiveValue(context, mobile: 134, tablet: 150),
-                            Responsive.isSmallScreen(context) ? 50 : 56,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Next Tip',
-                              style: TextStyle(
-                                fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.chevron_right, size: 20),
-                          ],
+                  ),
+                  // Остальной контент с padding
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: Responsive.getResponsiveValue(
+                          context,
+                          mobile: 17,
+                          tablet: 24,
                         ),
                       ),
+                      child: _isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : _contents.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    'No content available',
+                                    style: TextStyle(
+                                      fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+                                      color: const Color(0xFF888888),
+                                    ),
+                                  ),
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 27)),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          _contents[_currentIndex].phase ?? 'Menstrual Phase',
+                                          style: TextStyle(
+                                            fontSize: Responsive.getResponsiveFontSize(
+                                              context,
+                                              mobile: 24,
+                                              tablet: 28,
+                                            ),
+                                            height: 1.33,
+                                            color: const Color(0xFF222222),
+                                          ),
+                                        ),
+                                        Text(
+                                          _contents[_currentIndex].day ?? 'Day 1',
+                                          style: TextStyle(
+                                            fontSize: Responsive.getResponsiveFontSize(
+                                              context,
+                                              mobile: 16,
+                                              tablet: 18,
+                                            ),
+                                            color: const Color(0xFF222222),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 8, tablet: 10)),
+                                    Text(
+                                      _contents[_currentIndex].dayOfCycle ?? 'Day 1 of 28',
+                                      style: TextStyle(
+                                        fontSize: Responsive.getResponsiveFontSize(
+                                          context,
+                                          mobile: 16,
+                                          tablet: 18,
+                                        ),
+                                        color: const Color(0xFF222222),
+                                      ),
+                                    ),
+                                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 29)),
+                                    Text(
+                                      _contents[_currentIndex].description,
+                                      style: TextStyle(
+                                        fontSize: Responsive.getResponsiveFontSize(
+                                          context,
+                                          mobile: 20,
+                                          tablet: 22,
+                                        ),
+                                        height: 1.2,
+                                        color: const Color(0xFF222222),
+                                      ),
+                                    ),
+                                //    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 120, tablet: 140)),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: ElevatedButton(
+                                        onPressed: _contents.length > 1 ? _nextTip : null,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: const Color(0xFF222222),
+                                          foregroundColor: Colors.white,
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: Responsive.getResponsiveValue(context, mobile: 24, tablet: 24),
+                                            vertical: 18,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(24),
+                                          ),
+                                          minimumSize: Size(
+                                            Responsive.getResponsiveValue(context, mobile: 134, tablet: 150),
+                                            Responsive.isSmallScreen(context) ? 50 : 56,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'Next Tip',
+                                              style: TextStyle(
+                                                fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            const Icon(Icons.chevron_right, size: 20),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 120, tablet: 140)),
+                                  ],
+                                ),
                     ),
-                    SizedBox(height: Responsive.getResponsiveValue(context, mobile: 120, tablet: 140)),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
             menu.AppMenuBar(
