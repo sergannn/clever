@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../utils/responsive.dart';
+import '../utils/cycle_calculator.dart';
 import '../widgets/app_header.dart';
 import '../widgets/menu_bar.dart' as menu;
+import '../services/auth_storage_service.dart';
 import 'home_screen.dart';
 import 'guide_screen.dart';
 import 'account_screen.dart';
@@ -15,6 +17,22 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   String _activeTab = 'calendar';
+  DateTime _viewMonth;
+  CycleSettings? _settings;
+
+  _CalendarScreenState() : _viewMonth = DateTime(DateTime.now().year, DateTime.now().month);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final settings = await AuthStorageService.getCycleSettings();
+    if (!mounted) return;
+    setState(() => _settings = settings);
+  }
 
   void _navigateToTab(String tab) {
     if (tab == 'home') {
@@ -61,9 +79,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                     ),
                     SizedBox(height: Responsive.getResponsiveValue(context, mobile: 16, tablet: 20)),
-                    _CalendarCard(),
+                    if (_settings == null || !_settings!.hasMinimum)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          'Complete setup to see cycle phases on the calendar.',
+                          style: TextStyle(
+                            fontSize: Responsive.getResponsiveFontSize(context, mobile: 14, tablet: 16),
+                            color: const Color(0xFF888888),
+                          ),
+                        ),
+                      ),
+                    _CalendarCard(
+                      viewMonth: _viewMonth,
+                      settings: _settings,
+                      onPrevMonth: () {
+                        setState(() {
+                          _viewMonth = DateTime(_viewMonth.year, _viewMonth.month - 1);
+                        });
+                      },
+                      onNextMonth: () {
+                        setState(() {
+                          _viewMonth = DateTime(_viewMonth.year, _viewMonth.month + 1);
+                        });
+                      },
+                    ),
                     const SizedBox(height: 20),
-                    _PhaseLegend(),
+                    _PhaseLegend(periodLength: _settings?.periodLength ?? 5, cycleLength: _settings?.cycleLength ?? 28),
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -81,6 +123,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
 }
 
 class _CalendarCard extends StatelessWidget {
+  final DateTime viewMonth;
+  final CycleSettings? settings;
+  final VoidCallback onPrevMonth;
+  final VoidCallback onNextMonth;
+
+  const _CalendarCard({
+    required this.viewMonth,
+    required this.settings,
+    required this.onPrevMonth,
+    required this.onNextMonth,
+  });
+
+  static const _monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -98,11 +157,11 @@ class _CalendarCard extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.chevron_left),
                 color: const Color(0xFF222222),
-                onPressed: () {},
+                onPressed: onPrevMonth,
               ),
-              const Text(
-                'September',
-                style: TextStyle(
+              Text(
+                '${_monthNames[viewMonth.month - 1]} ${viewMonth.year}',
+                style: const TextStyle(
                   fontSize: 24,
                   height: 1.33,
                   color: Color(0xFF222222),
@@ -111,7 +170,7 @@ class _CalendarCard extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.chevron_right),
                 color: const Color(0xFF222222),
-                onPressed: () {},
+                onPressed: onNextMonth,
               ),
             ],
           ),
@@ -133,7 +192,7 @@ class _CalendarCard extends StatelessWidget {
                 .toList(),
           ),
           const SizedBox(height: 10),
-          _CalendarGrid(),
+          _CalendarGrid(viewMonth: viewMonth, settings: settings),
         ],
       ),
     );
@@ -141,41 +200,32 @@ class _CalendarCard extends StatelessWidget {
 }
 
 class _CalendarGrid extends StatelessWidget {
-  final List<_CalendarDay> days = [
-    _CalendarDay(1, 'menstrual'),
-    _CalendarDay(2, 'menstrual'),
-    _CalendarDay(3, 'menstrual'),
-    _CalendarDay(4, 'menstrual'),
-    _CalendarDay(5, 'menstrual', isCurrent: true),
-    _CalendarDay(6, 'follicular'),
-    _CalendarDay(7, 'follicular'),
-    _CalendarDay(8, 'follicular'),
-    _CalendarDay(9, 'follicular'),
-    _CalendarDay(10, 'follicular'),
-    _CalendarDay(11, 'follicular'),
-    _CalendarDay(12, 'follicular'),
-    _CalendarDay(13, 'follicular'),
-    _CalendarDay(14, 'ovulation'),
-    _CalendarDay(15, 'ovulation'),
-    _CalendarDay(16, 'luteal'),
-    _CalendarDay(17, 'luteal'),
-    _CalendarDay(18, 'luteal'),
-    _CalendarDay(19, 'luteal'),
-    _CalendarDay(20, 'luteal'),
-    _CalendarDay(21, 'luteal'),
-    _CalendarDay(22, 'luteal'),
-    _CalendarDay(23, 'luteal'),
-    _CalendarDay(24, 'luteal'),
-    _CalendarDay(25, 'luteal'),
-    _CalendarDay(26, 'luteal'),
-    _CalendarDay(27, 'luteal'),
-    _CalendarDay(28, 'luteal'),
-    _CalendarDay(29, 'follicular'),
-    _CalendarDay(30, 'follicular'),
-  ];
+  final DateTime viewMonth;
+  final CycleSettings? settings;
+
+  const _CalendarGrid({required this.viewMonth, required this.settings});
 
   @override
   Widget build(BuildContext context) {
+    final year = viewMonth.year;
+    final month = viewMonth.month;
+    final first = DateTime(year, month, 1);
+    final last = DateTime(year, month + 1, 0);
+    final startWeekday = first.weekday;
+    final daysInMonth = last.day;
+    final leadingEmpty = startWeekday - 1;
+    final totalCells = leadingEmpty + daysInMonth;
+    final rows = (totalCells / 7).ceil();
+    final total = rows * 7;
+
+    final cycleLength = settings?.cycleLength ?? 28;
+    final periodLength = settings?.periodLength ?? 5;
+    DateTime? cycleStart;
+    if (settings?.lastPeriodStartDate != null) {
+      cycleStart = DateTime.tryParse(settings!.lastPeriodStartDate!);
+    }
+    final today = DateTime.now();
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -184,9 +234,37 @@ class _CalendarGrid extends StatelessWidget {
         mainAxisSpacing: 4,
         crossAxisSpacing: 4,
       ),
-      itemCount: days.length,
+      itemCount: total,
       itemBuilder: (context, index) {
-        final day = days[index];
+        if (index < leadingEmpty) {
+          return const SizedBox.shrink();
+        }
+        final dayOfMonth = index - leadingEmpty + 1;
+        if (dayOfMonth > daysInMonth) {
+          return const SizedBox.shrink();
+        }
+        final date = DateTime(year, month, dayOfMonth);
+        int? dayOfCycle;
+        String phase = 'follicular';
+        if (cycleStart != null) {
+          dayOfCycle = CycleCalculator.currentDay(
+            cycleStart,
+            cycleLength,
+            date,
+          );
+          if (dayOfCycle != null) {
+            phase = CycleCalculator.phaseForDay(dayOfCycle, cycleLength, periodLength);
+          }
+        }
+        final isCurrent = date.year == today.year &&
+            date.month == today.month &&
+            date.day == today.day;
+        final day = _CalendarDay(
+          dayOfMonth,
+          phase,
+          isCurrent: isCurrent,
+          dayOfCycle: dayOfCycle,
+        );
         return _DayWidget(day: day);
       },
     );
@@ -216,6 +294,7 @@ class _DayWidget extends StatelessWidget {
         textColor = const Color(0xFF86BF6D);
         break;
       case 'ovulation':
+      case 'ovulatory':
         bgColor = const Color(0xFFFCF7E7);
         borderColor = const Color(0xFFE4B20E);
         textColor = const Color(0xFFE4B20E);
@@ -260,37 +339,45 @@ class _CalendarDay {
   final int number;
   final String phase;
   final bool isCurrent;
+  final int? dayOfCycle;
 
-  _CalendarDay(this.number, this.phase, {this.isCurrent = false});
+  _CalendarDay(this.number, this.phase, {this.isCurrent = false, this.dayOfCycle});
 }
 
 class _PhaseLegend extends StatelessWidget {
+  final int periodLength;
+  final int cycleLength;
+
+  const _PhaseLegend({this.periodLength = 5, this.cycleLength = 28});
+
   @override
   Widget build(BuildContext context) {
+    final follicularEnd = (cycleLength * 0.45).floor();
+    final ovulatoryEnd = (cycleLength * 0.50).floor();
     return Column(
       children: [
         _LegendItem(
           color: const Color(0xFFE95E5E),
           label: 'Menstrual Phase',
-          days: 'Days 1–5',
+          days: 'Days 1–$periodLength',
         ),
         const SizedBox(height: 16),
         _LegendItem(
           color: const Color(0xFF86BF6D),
           label: 'Follicular Phase',
-          days: 'Days 6–13',
+          days: 'Days ${periodLength + 1}–$follicularEnd',
         ),
         const SizedBox(height: 16),
         _LegendItem(
           color: const Color(0xFFE4B20E),
           label: 'Ovulation Phase',
-          days: 'Days 14–15',
+          days: 'Days ${follicularEnd + 1}–$ovulatoryEnd',
         ),
         const SizedBox(height: 16),
         _LegendItem(
           color: const Color(0xFF9654F4),
           label: 'Luteal Phase',
-          days: 'Days 16–28',
+          days: 'Days ${ovulatoryEnd + 1}–$cycleLength',
         ),
       ],
     );

@@ -1,25 +1,102 @@
 import 'package:flutter/material.dart';
 import '../utils/responsive.dart';
+import '../services/api_service.dart';
+import '../services/auth_storage_service.dart';
 import 'setup_screen.dart';
 import 'login_screen.dart';
+import 'home_screen.dart';
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _passwordConfirmController = TextEditingController();
+  bool _loading = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _passwordConfirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _signup() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirm = _passwordConfirmController.text;
+    if (name.isEmpty) {
+      setState(() => _error = 'Enter your name');
+      return;
+    }
+    if (email.isEmpty) {
+      setState(() => _error = 'Enter email');
+      return;
+    }
+    if (password.length < 8) {
+      setState(() => _error = 'Password must be at least 8 characters');
+      return;
+    }
+    if (password != confirm) {
+      setState(() => _error = 'Passwords do not match');
+      return;
+    }
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    final result = await ApiService.register(
+      name: name,
+      email: email,
+      password: password,
+      passwordConfirmation: confirm,
+    );
+    if (!mounted) return;
+    setState(() => _loading = false);
+    if (result.success) {
+      final settings = await AuthStorageService.getCycleSettings();
+      if (!context.mounted) return;
+      if (settings.hasMinimum) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const SetupScreen(pageIndex: 0)),
+        );
+      }
+    } else {
+      setState(() => _error = result.error ?? 'Sign up failed');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallScreen = Responsive.isSmallScreen(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
-            horizontal: Responsive.getResponsiveValue(context, mobile: 16, tablet: 24),
+            horizontal: Responsive.getResponsiveValue(
+                context, mobile: 16, tablet: 24),
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: screenHeight - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+              minHeight: screenHeight -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,35 +113,97 @@ class SignupScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                SizedBox(height: isSmallScreen ? 40 : 107),
+                SizedBox(height: isSmallScreen ? 40 : 60),
                 Text(
                   'Signup',
                   style: TextStyle(
-                    fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+                    fontSize: Responsive.getResponsiveFontSize(
+                        context, mobile: 16, tablet: 18),
                     color: const Color(0xFF222222),
                   ),
                 ),
-                SizedBox(height: isSmallScreen ? 20 : 39),
+                SizedBox(height: isSmallScreen ? 20 : 24),
                 Text(
                   'Let\'s create your Clever Account',
                   style: TextStyle(
-                    fontSize: Responsive.getResponsiveFontSize(context, mobile: 20, tablet: 24),
+                    fontSize: Responsive.getResponsiveFontSize(
+                        context, mobile: 20, tablet: 24),
                     height: 1.2,
                     color: const Color(0xFF222222),
                   ),
                 ),
-                SizedBox(height: isSmallScreen ? 40 : 100),
+                SizedBox(height: isSmallScreen ? 24 : 32),
+                TextField(
+                  controller: _nameController,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(
+                    hintText: 'Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 18),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  autocorrect: false,
+                  decoration: InputDecoration(
+                    hintText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 18),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: 'Password (min 8 characters)',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 18),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _passwordConfirmController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: 'Confirm password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 18),
+                  ),
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    _error!,
+                    style: const TextStyle(
+                      color: Color(0xFFE95E5E),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+                SizedBox(height: isSmallScreen ? 24 : 32),
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const SetupScreen(pageIndex: 0)),
-                    );
-                  },
+                  onPressed: _loading ? null : _signup,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF222222),
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(
-                      horizontal: Responsive.getResponsiveValue(context, mobile: 24, tablet: 32),
+                      horizontal: Responsive.getResponsiveValue(
+                          context, mobile: 24, tablet: 32),
                       vertical: 18,
                     ),
                     shape: RoundedRectangleBorder(
@@ -72,59 +211,22 @@ class SignupScreen extends StatelessWidget {
                     ),
                     minimumSize: Size(double.infinity, isSmallScreen ? 50 : 56),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/apple_icon.png',
-                        width: 20,
-                        height: 20,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const SizedBox(width: 20, height: 20);
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Sign up with Apple',
-                        style: TextStyle(
-                          fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
-                          fontWeight: FontWeight.w500,
+                  child: _loading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Sign up',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: isSmallScreen ? 16 : 20),
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
-                      color: const Color(0xFFA0A0A0),
-                    ),
-                    children: [
-                      const TextSpan(text: 'By continuing, you agree to our '),
-                      TextSpan(
-                        text: 'Terms of Use ',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF222222),
-                          fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
-                        ),
-                      ),
-                      const TextSpan(text: 'and acknowledge our '),
-                      TextSpan(
-                        text: 'Privacy Policy',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF222222),
-                          fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
-                        ),
-                      ),
-                      const TextSpan(
-                          text: ', which outlines how we use your personal information.'),
-                    ],
-                  ),
                 ),
                 SizedBox(height: isSmallScreen ? 16 : 20),
                 Center(
@@ -132,7 +234,8 @@ class SignupScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: TextStyle(
-                        fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+                        fontSize: Responsive.getResponsiveFontSize(
+                            context, mobile: 16, tablet: 18),
                         color: const Color(0xFFA0A0A0),
                       ),
                       children: [
@@ -150,7 +253,8 @@ class SignupScreen extends StatelessWidget {
                             child: Text(
                               'Log In',
                               style: TextStyle(
-                                fontSize: Responsive.getResponsiveFontSize(context, mobile: 16, tablet: 18),
+                                fontSize: Responsive.getResponsiveFontSize(
+                                    context, mobile: 16, tablet: 18),
                                 fontWeight: FontWeight.w500,
                                 color: const Color(0xFF222222),
                               ),
@@ -170,4 +274,3 @@ class SignupScreen extends StatelessWidget {
     );
   }
 }
-

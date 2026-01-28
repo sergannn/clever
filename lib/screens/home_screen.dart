@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../utils/responsive.dart';
+import '../utils/cycle_calculator.dart';
 import '../widgets/app_header.dart';
 import '../widgets/menu_bar.dart' as menu;
 import '../services/api_service.dart';
+import '../services/auth_storage_service.dart';
 import '../models/home_content.dart';
+import '../models/cycle_state.dart';
 import 'account_screen.dart';
 import 'calendar_screen.dart';
 import 'guide_screen.dart';
@@ -21,29 +24,89 @@ class _HomeScreenState extends State<HomeScreen> {
   List<HomeContent> _contents = [];
   bool _isLoading = true;
   int _currentIndex = 0;
+  CycleState? _cycleState;
 
   @override
   void initState() {
     super.initState();
-    _loadContents();
+    _loadCycleStateAndContents();
   }
 
-  Future<void> _loadContents() async {
+  Future<void> _loadCycleStateAndContents() async {
     setState(() {
       _isLoading = true;
+      _cycleState = null;
     });
-    
-    try {
-      final contents = await ApiService.getHomeContents();
-      setState(() {
-        _contents = contents;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+
+    CycleState? state;
+    final token = await AuthStorageService.getToken();
+    if (token != null && token.isNotEmpty) {
+      state = await ApiService.getCycleState();
     }
+    if (state == null || !state.hasData) {
+      final settings = await AuthStorageService.getCycleSettings();
+      if (settings.hasMinimum) {
+        final cycleLength = settings.cycleLength!;
+        final periodLength = settings.periodLength!;
+        final day = CycleCalculator.currentDay(
+          settings.lastPeriodStartDate!,
+          cycleLength,
+        );
+        if (day != null) {
+          state = CycleState(
+            currentDay: day,
+            phase: CycleCalculator.phaseForDay(day, cycleLength, periodLength),
+            cycleLength: cycleLength,
+            periodLength: periodLength,
+            phasePercent: CycleCalculator.phasePercent(day, cycleLength),
+            timezone: settings.timezone,
+          );
+        }
+      }
+    }
+
+    String? phase = state?.phase;
+    int? relativeDay = state?.currentDay;
+    final contents = await ApiService.getHomeContents(
+      phase: phase,
+      relativeDayPosition: relativeDay,
+    );
+    if (!mounted) return;
+    setState(() {
+      _cycleState = state;
+      _contents = contents;
+      _isLoading = false;
+    });
+  }
+
+  String _displayPhase() {
+    if (_cycleState?.phase != null) {
+      final p = _cycleState!.phase!;
+      return '${p[0].toUpperCase()}${p.substring(1)} Phase';
+    }
+    if (_contents.isNotEmpty && _contents[_currentIndex].phase != null) {
+      final p = _contents[_currentIndex].phase!;
+      return '${p[0].toUpperCase()}${p.substring(1)} Phase';
+    }
+    return 'Menstrual Phase';
+  }
+
+  String _displayDay() {
+    if (_cycleState?.currentDay != null) return 'Day ${_cycleState!.currentDay}';
+    if (_contents.isNotEmpty && _contents[_currentIndex].day != null) {
+      return _contents[_currentIndex].day!;
+    }
+    return 'Day 1';
+  }
+
+  String _displayDayOfCycle() {
+    if (_cycleState?.currentDay != null && _cycleState?.cycleLength != null) {
+      return 'Day ${_cycleState!.currentDay} of ${_cycleState!.cycleLength}';
+    }
+    if (_contents.isNotEmpty && _contents[_currentIndex].dayOfCycle != null) {
+      return _contents[_currentIndex].dayOfCycle!;
+    }
+    return 'Day 1 of 28';
   }
 
   void _nextTip() {
@@ -168,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          _contents[_currentIndex].phase ?? 'Menstrual Phase',
+                                          _displayPhase(),
                                           style: TextStyle(
                                             fontSize: Responsive.getResponsiveFontSize(
                                               context,
@@ -180,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                         Text(
-                                          _contents[_currentIndex].day ?? 'Day 1',
+                                          _displayDay(),
                                           style: TextStyle(
                                             fontSize: Responsive.getResponsiveFontSize(
                                               context,
@@ -194,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     SizedBox(height: Responsive.getResponsiveValue(context, mobile: 8, tablet: 10)),
                                     Text(
-                                      _contents[_currentIndex].dayOfCycle ?? 'Day 1 of 28',
+                                      _displayDayOfCycle(),
                                       style: TextStyle(
                                         fontSize: Responsive.getResponsiveFontSize(
                                           context,
@@ -206,7 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     SizedBox(height: Responsive.getResponsiveValue(context, mobile: 20, tablet: 29)),
                                     Text(
-                                      _contents[_currentIndex].description,
+                                      _contents[_currentIndex].shortText ?? _contents[_currentIndex].description,
                                       style: TextStyle(
                                         fontSize: Responsive.getResponsiveFontSize(
                                           context,

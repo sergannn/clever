@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/responsive.dart';
+import '../services/auth_storage_service.dart';
+import '../services/api_service.dart';
 import 'home_screen.dart';
 
 class SetupScreen extends StatefulWidget {
@@ -28,6 +30,19 @@ class _SetupScreenState extends State<SetupScreen> {
     super.initState();
     _currentPage = widget.pageIndex;
     _pageController = PageController(initialPage: widget.pageIndex);
+    _loadSavedSettings();
+  }
+
+  Future<void> _loadSavedSettings() async {
+    final settings = await AuthStorageService.getCycleSettings();
+    if (!mounted) return;
+    setState(() {
+      if (settings.lastPeriodStartDate != null) {
+        _lastPeriodDate = DateTime.tryParse(settings.lastPeriodStartDate!);
+      }
+      if (settings.cycleLength != null) _cycleLength = settings.cycleLength!;
+      if (settings.periodLength != null) _periodLength = settings.periodLength!;
+    });
   }
 
   @override
@@ -36,20 +51,38 @@ class _SetupScreenState extends State<SetupScreen> {
     super.dispose();
   }
 
-  void _nextPage() {
+  Future<void> _nextPage() async {
     if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
-      // Завершение setup - переход на Home
-      if (context.mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      }
+      // Завершение setup — сохраняем в SharedPreferences и на API, переход на Home
+      if (context.mounted) await _finishSetup();
     }
+  }
+
+  Future<void> _finishSetup() async {
+    if (_lastPeriodDate == null) return;
+    final lastPeriodStr = DateFormat('yyyy-MM-dd').format(_lastPeriodDate!);
+    await AuthStorageService.setCycleSettings(
+      lastPeriodStartDate: lastPeriodStr,
+      cycleLength: _cycleLength,
+      periodLength: _periodLength,
+    );
+    final token = await AuthStorageService.getToken();
+    if (token != null && token.isNotEmpty) {
+      await ApiService.updateUser(
+        lastPeriodStartDate: lastPeriodStr,
+        averageCycleLength: _cycleLength,
+        averagePeriodLength: _periodLength,
+      );
+    }
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
   }
 
   void _previousPage() {

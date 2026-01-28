@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/responsive.dart';
+import '../services/auth_storage_service.dart';
 import 'onboarding_screen.dart';
+import 'home_screen.dart';
 
 class IntroScreen extends StatelessWidget {
   const IntroScreen({super.key});
@@ -118,13 +120,22 @@ class IntroScreen extends StatelessWidget {
                         tablet: 343,
                       ),
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          if (!context.mounted) return;
+                          final token = await AuthStorageService.getToken();
+                          final settings = await AuthStorageService.getCycleSettings();
                           if (context.mounted) {
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => const OnboardingScreen(pageIndex: 0),
-                              ),
-                            );
+                            if (token != null && token.isNotEmpty && settings.hasMinimum) {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                              );
+                            } else {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (_) => const OnboardingScreen(pageIndex: 0),
+                                ),
+                              );
+                            }
                           }
                         },
                         style: ElevatedButton.styleFrom(
